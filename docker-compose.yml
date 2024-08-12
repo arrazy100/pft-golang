@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: .deployments/Dockerfile.dev
+    volumes:
+      - .:/app
+      - /app/vendor
+      - /app/tmp
+    ports:
+      - "50051:50051"
+    environment:
+      - GO111MODULE=on
+      - CONFIG_FILE=config.dev.yml
+    depends_on:
+      - db
+
+  db:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=b321456
+      - POSTGRES_DB=pft-db
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+volumes:
+  postgres-data:

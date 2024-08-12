@@ -1,0 +1,5 @@
+protoc --go_out=. --go-grpc_out=. internal/app/proto/transaction.proto
+
+./atlas migrate diff --env gorm
+
+./atlas migrate apply --url "postgresql://postgres:b321456@localhost:5432/pft-db?sslmode=disable"

@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package pft;
+
+option go_package = "internal/app/generated_proto";
+
+enum TransactionType {
+  INCOME = 0;
+  EXPENSE = 1;
+  TRANSFER = 2;
+}
+
+message Transaction {
+  string id = 1;
+  string user_id = 2;
+  string category_id = 3;
+  string description = 4;
+  string account_id = 5;
+  string attachment_id = 6;
+  string amount = 7;
+  TransactionType type = 8;
+  bool is_deleted = 9;
+  string created_at = 10;
+  string updated_at = 11;
+  string deleted_at = 12;
+}
+
+message CreateTransactionRequest {
+  Transaction transaction = 1;
+}
+
+message CreateTransactionResponse {
+  string message = 1;
+  Transaction transaction = 2;
+}
+
+service TransactionService {
+  rpc CreateTransaction (CreateTransactionRequest) returns (CreateTransactionResponse);
+}

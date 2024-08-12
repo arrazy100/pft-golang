@@ -1,0 +1,12 @@
+db:
+  host: db
+  user: postgres
+  password: b321456
+  db_name: pft-db
+  port: 5432
+  sslmode: false
+
+migrations:
+  mode: auto
+
+port: 50051
