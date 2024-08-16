@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package pft;
+
+option go_package = "internal/app/generated_proto";
+
+enum AttachmentType {
+    GOOGLE_DRIVE = 0;
+}
+
+message Attachment {
+  string id = 1;
+  AttachmentType type = 2;
+  string content_url = 3;
+  string user_id = 4;
+  string created_by = 5;
+  string created_at = 6;
+}
+
+message AttachmentMini {
+  string id = 1;
+  AttachmentType type = 2;
+  string content_url = 3;
+}
+
+message AttachmentCreate {
+    AttachmentType type = 1;
+    string content_url = 2;  
+}
+
+message CreateAttachmentRequest {
+  AttachmentCreate data = 1;
+}
+
+message CreateAttachmentResponse {
+  string message = 1;
+  Attachment data = 2;
+}
+
+service AttachmentService {
+  rpc CreateAttachment (CreateAttachmentRequest) returns (CreateAttachmentResponse);
+}

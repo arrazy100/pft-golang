@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package pft;
+
+option go_package = "internal/app/generated_proto";
+
+message BalanceTotal {
+  string id = 1;
+  string income_total = 2;
+  string expense_total = 3;
+  string month = 4;
+  string year = 5;
+  string user_id = 6;
+  string created_by = 7;
+  string created_at = 8;
+}
+
+message BalanceTotalCreate {
+    string income_total = 1;
+    string expense_total = 2;
+    string month = 3;
+    string year = 4;
+}
+
+message CreateBalanceTotalRequest {
+  BalanceTotalCreate data = 1;
+}
+
+message CreateBalanceTotalResponse {
+  string message = 1;
+  BalanceTotal data = 2;
+}
+
+// service BalanceTotalService {
+//   rpc CreateBalanceTotal (CreateBalanceTotalRequest) returns (CreateBalanceTotalResponse);
+// }

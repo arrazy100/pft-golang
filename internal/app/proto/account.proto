@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package pft;
+
+option go_package = "internal/app/generated_proto";
+
+enum AccountType {
+  BANK = 0;
+  EWALLET = 1;
+  CARD = 2;
+}
+
+message Account {
+  string id = 1;
+  AccountType type = 2;
+  string balance = 3;
+  string name = 4;
+  string user_id = 5;
+  string created_by = 6;
+  string created_at = 7;
+}
+
+message AccountMini {
+  string id = 1;
+  AccountType type = 2;
+  string balance = 3;
+  string name = 4;
+}
+
+message AccountCreate {
+    AccountType type = 1;
+    string balance = 2;
+    string name = 3;
+}
+
+message CreateAccountRequest {
+  AccountCreate data = 1;
+}
+
+message CreateAccountResponse {
+  string message = 1;
+  Account data = 2;
+}
+
+service AccountService {
+  rpc CreateAccount (CreateAccountRequest) returns (CreateAccountResponse);
+}

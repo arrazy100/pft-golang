@@ -1,5 +1,12 @@
-protoc --go_out=. --go-grpc_out=. internal/app/proto/transaction.proto
+protoc -I ./extras/protovalidate -I ./internal/app/proto --go_out=. --go-grpc_out=. transaction.proto
+protoc -I ./internal/app/proto --go_out=. --go-grpc_out=. transaction.proto
 
 ./atlas migrate diff --env gorm
 
 ./atlas migrate apply --url "postgresql://postgres:b321456@localhost:5432/pft-db?sslmode=disable"
+
+docker compose down
+
+docker compose build --no-cache
+
+docker compose up

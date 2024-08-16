@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package pft;
+
+option go_package = "internal/app/generated_proto";
+
+message Category {
+  string id = 1;
+  string name = 2;
+  string user_id = 3;
+  string created_by = 4;
+  string created_at = 5;
+}
+
+message CategoryMini {
+  string id = 1;
+  string name = 2;
+}
+
+message CategoryCreate {
+  string name = 1;  
+}
+
+message CreateCategoryRequest {
+  CategoryCreate data = 1;
+}
+
+message CreateCategoryResponse {
+  string message = 1;
+  Category data = 2;
+}
+
+service CategoryService {
+  rpc CreateCategory (CreateCategoryRequest) returns (CreateCategoryResponse);
+}

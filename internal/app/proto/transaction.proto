@@ -4,6 +4,10 @@ package pft;
 
 option go_package = "internal/app/generated_proto";
 
+import "internal/app/proto/category.proto";
+import "internal/app/proto/account.proto";
+import "internal/app/proto/attachment.proto";
+
 enum TransactionType {
   INCOME = 0;
   EXPENSE = 1;
@@ -12,28 +16,68 @@ enum TransactionType {
 
 message Transaction {
   string id = 1;
-  string user_id = 2;
-  string category_id = 3;
-  string description = 4;
-  string account_id = 5;
-  string attachment_id = 6;
-  string amount = 7;
-  TransactionType type = 8;
-  bool is_deleted = 9;
-  string created_at = 10;
-  string updated_at = 11;
-  string deleted_at = 12;
+  string description = 2;
+  string amount = 3;
+  TransactionType type = 4;
+  string transaction_date = 5;
+  string category_id = 6;
+  string account_id = 7;
+  string attachment_id = 8;
+  string user_id = 9;
+  string created_by = 10;
+  string created_at = 11;
+  CategoryMini category = 12;
+  AccountMini Account = 13;
+  AttachmentMini attachment = 14;
+}
+
+message TransactionCreate {
+  string description = 1;
+  string amount = 2;
+  TransactionType type = 3;
+  string transaction_date = 4;
+  string category_id = 5;
+  string account_id = 6;
+  string attachment_id = 7;
+  string user_id = 8;
+  int32 timezone = 9;
 }
 
 message CreateTransactionRequest {
-  Transaction transaction = 1;
+  TransactionCreate data = 1;
 }
 
 message CreateTransactionResponse {
   string message = 1;
-  Transaction transaction = 2;
+  Transaction data = 2;
+}
+
+message ListTransactionRequest {
+  optional int32 take = 1;
+  optional int32 skip = 2;
+  optional string start_date = 3;
+  optional string end_date = 4;
+  string user_id = 5;
+  int32 timezone = 6;
+  optional string category_id = 7;
+}
+
+message ListTransactionResponse {
+  repeated Transaction data = 1;  
+  int32 take = 2;
+  int32 skip = 3;
+  string start_date = 4;
+  string end_date = 5;
+  int64 total = 6;
+}
+
+message GetTransactionRequest {
+  string id = 1;
+  string user_id = 2;
+  int32 timezone = 3;
 }
 
 service TransactionService {
   rpc CreateTransaction (CreateTransactionRequest) returns (CreateTransactionResponse);
+  rpc ListTransaction (ListTransactionRequest) returns (ListTransactionResponse);
 }

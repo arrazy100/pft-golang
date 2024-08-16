@@ -10,3 +10,4 @@ migrations:
   mode: auto
 
 port: 50051
+tls: true

@@ -33,7 +33,7 @@ type Configs struct {
 	AppPort            string
 }
 
-func getProjectRootDir() (string, error) {
+func GetProjectRootDir() (string, error) {
 	dir, err := os.Getwd()
 	if err != nil {
 		return "", err
@@ -55,7 +55,7 @@ func getProjectRootDir() (string, error) {
 }
 
 func LoadConfig(filename string) *Configs {
-	rootDir, err := getProjectRootDir()
+	rootDir, err := GetProjectRootDir()
 	if err != nil {
 		log.Fatal(err)
 	}
