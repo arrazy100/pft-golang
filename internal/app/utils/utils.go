@@ -7,6 +7,7 @@ type RequestDateTimeFilterData struct {
 	Skip      int
 	StartDate time.Time
 	EndDate   time.Time
+	Timezone  int
 }
 
 func GetTimezoneOffset(timezone int) time.Duration {
@@ -64,13 +65,14 @@ func ParseRequestDateTimeFilter(take int, skip int, startDate string, endDate st
 		parseEndDate = parseStartDate.Add(24 * time.Hour)
 	}
 
-	parseStartDate = parseStartDate.Add(-offset)
-	parseEndDate = parseEndDate.Add(-offset)
+	// parseStartDate = parseStartDate.Add(-offset)
+	// parseEndDate = parseEndDate.Add(-offset)
 
 	return &RequestDateTimeFilterData{
 		Take:      take,
 		Skip:      skip,
 		StartDate: parseStartDate,
 		EndDate:   parseEndDate,
+		Timezone:  timezone,
 	}, err
 }

@@ -31,12 +31,15 @@ func (s *TransactionService) CreateTransaction(ctx context.Context, req *pb.Crea
 		return nil, fmt.Errorf("no transaction data provided")
 	}
 
-	userId := "597c5e7d-63dc-4df1-9954-fefe8b415634"
+	userId := transaction.UserId
 
 	transactionDate, err := time.Parse(time.RFC3339, transaction.TransactionDate)
 	if err != nil {
 		return nil, err
 	}
+
+	transactionDate = transactionDate.Add(utils.GetTimezoneOffset(int(transaction.Timezone)))
+	fmt.Println(transactionDate.String())
 
 	dbTransaction := &models.Transaction{
 		Description:     transaction.Description,
@@ -94,9 +97,8 @@ func (s *TransactionService) ListTransaction(ctx context.Context, req *pb.ListTr
 	skip := int(req.GetSkip())
 	startDate := req.GetStartDate()
 	endDate := req.GetEndDate()
-	userId := req.GetUserId()
 	categoryId := req.GetCategoryId()
-	timezone := 420
+	timezone := req.GetTimezone()
 
 	parsedRequest, err := utils.ParseRequestDateTimeFilter(take, skip, startDate, endDate, int(timezone))
 
@@ -104,14 +106,26 @@ func (s *TransactionService) ListTransaction(ctx context.Context, req *pb.ListTr
 		return nil, err
 	}
 
+	userId := req.GetUserId()
+	if userId == "" {
+		return nil, fmt.Errorf("no user id provided")
+	}
+
 	dbTransaction := []models.Transaction{}
 	query := s.db.
+		Where("user_id = ?", userId).
+		Where("transaction_date BETWEEN ? AND ?", parsedRequest.StartDate, parsedRequest.EndDate)
+
+	var total int64
+	queryTotal := s.db.
+		Model(&models.Transaction{}).
 		Where("user_id = ?", userId).
 		Where("transaction_date BETWEEN ? AND ?", parsedRequest.StartDate, parsedRequest.EndDate)
 
 	category, err := uuid.Parse(categoryId)
 	if err == nil {
 		query = query.Where("category_id = ?", category)
+		queryTotal = queryTotal.Where("category_id = ?", category)
 	}
 
 	result := query.
@@ -126,10 +140,7 @@ func (s *TransactionService) ListTransaction(ctx context.Context, req *pb.ListTr
 		return nil, result.Error
 	}
 
-	var total int64
-	result = s.db.
-		Model(&models.Transaction{}).
-		Where("user_id = ?", userId).
+	result = queryTotal.
 		Count(&total)
 
 	if result.Error != nil {
@@ -163,7 +174,7 @@ func (s *TransactionService) ListTransaction(ctx context.Context, req *pb.ListTr
 		Total:     total,
 		Take:      int32(parsedRequest.Take),
 		Skip:      int32(parsedRequest.Skip),
-		StartDate: utils.TimeFormatAsDate(parsedRequest.StartDate, timezone),
-		EndDate:   utils.TimeFormatAsDate(parsedRequest.EndDate, timezone),
+		StartDate: utils.TimeFormatAsDate(parsedRequest.StartDate, parsedRequest.Timezone),
+		EndDate:   utils.TimeFormatAsDate(parsedRequest.EndDate, parsedRequest.Timezone),
 	}, nil
 }

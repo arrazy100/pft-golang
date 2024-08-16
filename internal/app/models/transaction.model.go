@@ -12,7 +12,6 @@ type TransactionType int
 const (
 	Income TransactionType = iota
 	Expense
-	Transfer
 )
 
 type Transaction struct {
