@@ -78,5 +78,5 @@ message GetTransactionRequest {
 
 service TransactionService {
   rpc CreateTransaction (CreateTransactionRequest) returns (CreateTransactionResponse);
-  rpc ListTransaction (ListTransactionRequest) returns (ListTransactionResponse);
+  rpc ListTransactions (ListTransactionRequest) returns (ListTransactionResponse);
 }

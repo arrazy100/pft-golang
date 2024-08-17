@@ -1,6 +1,15 @@
 package utils
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
+
+type RequestPaginationFilterData struct {
+	Take int
+	Skip int
+}
 
 type RequestDateTimeFilterData struct {
 	Take      int
@@ -24,7 +33,16 @@ func TimeFormatAsDate(datetime time.Time, timezone int) string {
 	return datetime.Add(GetTimezoneOffset(timezone)).Format(format)
 }
 
-func ParseRequestDateTimeFilter(take int, skip int, startDate string, endDate string, timezone int) (*RequestDateTimeFilterData, error) {
+func ValidateUUIDFromString(str string) (*string, error) {
+	_, err := uuid.Parse(str)
+	if err != nil {
+		return nil, err
+	}
+
+	return &str, nil
+}
+
+func ParsePaginationFilter(take int, skip int) (*RequestPaginationFilterData, error) {
 	if take > 100 || take <= 0 {
 		take = 100
 	}
@@ -32,6 +50,20 @@ func ParseRequestDateTimeFilter(take int, skip int, startDate string, endDate st
 	if skip < 0 {
 		skip = 0
 	}
+
+	return &RequestPaginationFilterData{
+		Take: take,
+		Skip: skip,
+	}, nil
+}
+
+func ParseRequestDateTimeFilter(take int, skip int, startDate string, endDate string, timezone int) (*RequestDateTimeFilterData, error) {
+	parsePagination, err := ParsePaginationFilter(take, skip)
+	if err != nil {
+		return nil, err
+	}
+	take = parsePagination.Take
+	skip = parsePagination.Skip
 
 	offset := GetTimezoneOffset(timezone)
 	format := "2006-01-02"

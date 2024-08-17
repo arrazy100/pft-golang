@@ -2,8 +2,6 @@ package base_models
 
 import (
 	"time"
-
-	"gorm.io/gorm"
 )
 
 type BaseAudit struct {
@@ -11,8 +9,6 @@ type BaseAudit struct {
 	CreatedBy string    `gorm:"type:uuid"`
 	UpdatedAt *time.Time
 	UpdatedBy *string `gorm:"type:uuid"`
-	IsDeleted bool
-	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 
 // Set audit when creating data
@@ -26,9 +22,4 @@ func (b *BaseAudit) SetAuditUpdate(updatedBy string) {
 
 	b.UpdatedBy = &updatedBy
 	b.UpdatedAt = &now
-}
-
-func (b *BaseAudit) SetAuditDelete() {
-	b.IsDeleted = true
-	b.DeletedAt = gorm.DeletedAt{Time: time.Now().UTC()}
 }

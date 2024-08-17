@@ -31,6 +31,7 @@ message AccountCreate {
     AccountType type = 1;
     string balance = 2;
     string name = 3;
+    string user_id = 4;   
 }
 
 message CreateAccountRequest {
@@ -42,6 +43,38 @@ message CreateAccountResponse {
   Account data = 2;
 }
 
+message ListAccountRequest {
+  int32 take = 1;
+  int32 skip = 2;
+  string user_id = 3;
+  int64 total = 4;
+}
+
+message ListAccountResponse {
+  repeated Account data = 1;
+  int32 take = 2;
+  int32 skip = 3;
+  int64 total = 4;
+}
+
+message GetAccountRequest {
+  string id = 1;
+  string user_id = 2;
+}
+
+message DeleteAccountRequest {
+  string id = 1;
+  string user_id = 2;
+}
+
+message DeleteAccountResponse {
+  string message = 1;
+}
+
 service AccountService {
   rpc CreateAccount (CreateAccountRequest) returns (CreateAccountResponse);
+  rpc ListAccounts (ListAccountRequest) returns (ListAccountResponse);
+  rpc GetAccount (GetAccountRequest) returns (Account);
+  rpc EditAccount (Account) returns (Account);
+  rpc DeleteAccount (DeleteAccountRequest) returns (DeleteAccountResponse);
 }

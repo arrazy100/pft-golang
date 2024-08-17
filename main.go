@@ -33,31 +33,26 @@ func main() {
 
 	// Create service
 	transactionService, err := services.NewTransactionService(configs.DatabaseConnection, validate)
-
 	if err != nil {
 		log.Fatalf("Failed to create transaction service: %v", err)
 	}
 
 	categoryService, err := services.NewCategoryService(configs.DatabaseConnection, validate)
-
 	if err != nil {
 		log.Fatalf("Failed to create category service: %v", err)
 	}
 
 	attachmentService, err := services.NewAttachmentService(configs.DatabaseConnection, validate)
-
 	if err != nil {
 		log.Fatalf("Failed to create attachment service: %v", err)
 	}
 
 	accountService, err := services.NewAccountService(configs.DatabaseConnection, validate)
-
 	if err != nil {
 		log.Fatalf("Failed to create account service: %v", err)
 	}
 
 	lis, err := net.Listen("tcp", ":50051")
-
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}

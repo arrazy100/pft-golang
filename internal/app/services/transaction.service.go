@@ -92,7 +92,7 @@ func (s *TransactionService) CreateTransaction(ctx context.Context, req *pb.Crea
 	}, nil
 }
 
-func (s *TransactionService) ListTransaction(ctx context.Context, req *pb.ListTransactionRequest) (*pb.ListTransactionResponse, error) {
+func (s *TransactionService) ListTransactions(ctx context.Context, req *pb.ListTransactionRequest) (*pb.ListTransactionResponse, error) {
 	take := int(req.GetTake())
 	skip := int(req.GetSkip())
 	startDate := req.GetStartDate()
@@ -100,15 +100,14 @@ func (s *TransactionService) ListTransaction(ctx context.Context, req *pb.ListTr
 	categoryId := req.GetCategoryId()
 	timezone := req.GetTimezone()
 
-	parsedRequest, err := utils.ParseRequestDateTimeFilter(take, skip, startDate, endDate, int(timezone))
-
+	userId, err := utils.ValidateUUIDFromString(req.GetUserId())
 	if err != nil {
 		return nil, err
 	}
 
-	userId := req.GetUserId()
-	if userId == "" {
-		return nil, fmt.Errorf("no user id provided")
+	parsedRequest, err := utils.ParseRequestDateTimeFilter(take, skip, startDate, endDate, int(timezone))
+	if err != nil {
+		return nil, err
 	}
 
 	dbTransaction := []models.Transaction{}
@@ -132,17 +131,12 @@ func (s *TransactionService) ListTransaction(ctx context.Context, req *pb.ListTr
 		Preload("Category").
 		Preload("Account").
 		Preload("Attachment").
-		Limit(parsedRequest.Take).
-		Offset(parsedRequest.Skip).
-		Find(&dbTransaction)
-
+		Limit(parsedRequest.Take).Offset(parsedRequest.Skip).Find(&dbTransaction)
 	if result.Error != nil {
 		return nil, result.Error
 	}
 
-	result = queryTotal.
-		Count(&total)
-
+	result = queryTotal.Count(&total)
 	if result.Error != nil {
 		return nil, result.Error
 	}
