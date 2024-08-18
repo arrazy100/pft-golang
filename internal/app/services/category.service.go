@@ -42,7 +42,6 @@ func (s *CategoryService) CreateCategory(ctx context.Context, req *pb.CreateCate
 	dbCategory.SetAuditCreate(userId)
 	dbCategory.SetUser(userId)
 
-	// validation
 	err := s.validate.Struct(dbCategory)
 	if err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
@@ -52,7 +51,6 @@ func (s *CategoryService) CreateCategory(ctx context.Context, req *pb.CreateCate
 		return nil, err
 	}
 
-	// Save to database
 	result := s.db.Create(dbCategory)
 	if result.Error != nil {
 		if pgError := result.Error.(*pgconn.PgError); errors.Is(result.Error, pgError) {
@@ -64,7 +62,6 @@ func (s *CategoryService) CreateCategory(ctx context.Context, req *pb.CreateCate
 		return nil, result.Error
 	}
 
-	// Convert back to protobuf Transaction
 	createdCategory := &pb.Category{
 		Id:        dbCategory.Id.String(),
 		Name:      dbCategory.Name,

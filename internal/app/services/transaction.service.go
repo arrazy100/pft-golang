@@ -24,6 +24,37 @@ func NewTransactionService(db *gorm.DB, validate *validator.Validate) (*Transact
 	return &TransactionService{db: db, validate: validate}, nil
 }
 
+func (s *TransactionService) SetAttachmentToTransaction(attachmentId string, transactionId string) error {
+	_, err := utils.ValidateUUIDFromString(attachmentId)
+	if err != nil {
+		return err
+	}
+
+	_, err = utils.ValidateUUIDFromString(transactionId)
+	if err != nil {
+		return err
+	}
+
+	dbAttachment := &models.Attachment{}
+	result := s.db.Where("id = ?", attachmentId).First(&dbAttachment)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if dbAttachment.TransactionId != uuid.Nil {
+		return fmt.Errorf("attachment already has a transaction associated with it")
+	}
+
+	dbAttachment.TransactionId = uuid.MustParse(transactionId)
+
+	result = s.db.Save(&dbAttachment)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}
+
 func (s *TransactionService) CreateTransaction(ctx context.Context, req *pb.CreateTransactionRequest) (*pb.CreateTransactionResponse, error) {
 	transaction := req.GetData()
 
@@ -39,7 +70,6 @@ func (s *TransactionService) CreateTransaction(ctx context.Context, req *pb.Crea
 	}
 
 	transactionDate = transactionDate.Add(utils.GetTimezoneOffset(int(transaction.Timezone)))
-	fmt.Println(transactionDate.String())
 
 	dbTransaction := &models.Transaction{
 		Description:     transaction.Description,
@@ -48,14 +78,13 @@ func (s *TransactionService) CreateTransaction(ctx context.Context, req *pb.Crea
 		TransactionDate: transactionDate,
 		CategoryId:      uuid.MustParse(transaction.CategoryId),
 		AccountId:       uuid.MustParse(transaction.AccountId),
-		AttachmentId:    uuid.MustParse(transaction.AttachmentId),
 	}
 
+	dbTransaction.SetAttachment(transaction.AttachmentId)
 	dbTransaction.SetId()
 	dbTransaction.SetAuditCreate(userId)
 	dbTransaction.SetUser(userId)
 
-	// validation
 	err = s.validate.Struct(dbTransaction)
 	if err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
@@ -65,13 +94,20 @@ func (s *TransactionService) CreateTransaction(ctx context.Context, req *pb.Crea
 		return nil, err
 	}
 
-	// Save to database
 	result := s.db.Create(dbTransaction)
 	if result.Error != nil {
 		return nil, result.Error
 	}
 
-	// Convert back to protobuf Transaction
+	if transaction.AttachmentId != "" && dbTransaction.AttachmentId != uuid.Nil {
+		err := s.SetAttachmentToTransaction(transaction.AttachmentId, dbTransaction.Id.String())
+		if err != nil {
+			return nil, err
+		}
+
+		dbTransaction.AttachmentId = uuid.MustParse(transaction.AttachmentId)
+	}
+
 	createdTransaction := &pb.Transaction{
 		Id:              dbTransaction.Id.String(),
 		Description:     dbTransaction.Description,
@@ -80,10 +116,13 @@ func (s *TransactionService) CreateTransaction(ctx context.Context, req *pb.Crea
 		TransactionDate: dbTransaction.TransactionDate.String(),
 		CategoryId:      dbTransaction.CategoryId.String(),
 		AccountId:       dbTransaction.AccountId.String(),
-		AttachmentId:    dbTransaction.AttachmentId.String(),
 		UserId:          dbTransaction.UserId,
 		CreatedAt:       dbTransaction.CreatedAt.String(),
 		CreatedBy:       dbTransaction.CreatedBy,
+	}
+
+	if dbTransaction.AttachmentId != uuid.Nil {
+		createdTransaction.AttachmentId = dbTransaction.AttachmentId.String()
 	}
 
 	return &pb.CreateTransactionResponse{
@@ -151,13 +190,16 @@ func (s *TransactionService) ListTransactions(ctx context.Context, req *pb.ListT
 			TransactionDate: dbTransaction.TransactionDate.String(),
 			CategoryId:      dbTransaction.CategoryId.String(),
 			AccountId:       dbTransaction.AccountId.String(),
-			AttachmentId:    dbTransaction.AttachmentId.String(),
 			UserId:          dbTransaction.UserId,
 			CreatedAt:       dbTransaction.CreatedAt.String(),
 			CreatedBy:       dbTransaction.CreatedBy,
 			Category:        &pb.CategoryMini{Id: dbTransaction.Category.Id.String(), Name: dbTransaction.Category.Name},
 			Account:         &pb.AccountMini{Id: dbTransaction.Account.Id.String(), Name: dbTransaction.Account.Name, Balance: dbTransaction.Account.Balance},
-			Attachment:      &pb.AttachmentMini{Id: dbTransaction.Attachment.Id.String(), ContentUrl: dbTransaction.Attachment.ContentUrl, Type: pb.AttachmentType(dbTransaction.Attachment.Type)},
+		}
+
+		if dbTransaction.AttachmentId != uuid.Nil {
+			transaction.AttachmentId = dbTransaction.AttachmentId.String()
+			transaction.Attachment = &pb.AttachmentMini{Id: dbTransaction.Attachment.Id.String(), ContentUrl: dbTransaction.Attachment.ContentUrl, Type: pb.AttachmentType(dbTransaction.Attachment.Type)}
 		}
 
 		transactions = append(transactions, transaction)

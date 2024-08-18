@@ -41,7 +41,6 @@ func (s *AccountService) CreateAccount(ctx context.Context, req *pb.CreateAccoun
 	dbAccount.SetAuditCreate(account.UserId)
 	dbAccount.SetUser(account.UserId)
 
-	// validation
 	err := s.validate.Struct(dbAccount)
 	if err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
@@ -51,13 +50,11 @@ func (s *AccountService) CreateAccount(ctx context.Context, req *pb.CreateAccoun
 		return nil, err
 	}
 
-	// Save to database
 	result := s.db.Create(dbAccount)
 	if result.Error != nil {
 		return nil, result.Error
 	}
 
-	// Convert back to protobuf Transaction
 	createdAcount := &pb.Account{
 		Id:        dbAccount.Id.String(),
 		Type:      pb.AccountType(dbAccount.Type),

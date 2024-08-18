@@ -38,7 +38,6 @@ func (s *AttachmentService) CreateAttachment(ctx context.Context, req *pb.Create
 	dbAttachment.SetAuditCreate(userId)
 	dbAttachment.SetUser(userId)
 
-	// validation
 	err := s.validate.Struct(dbAttachment)
 	if err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
@@ -48,13 +47,11 @@ func (s *AttachmentService) CreateAttachment(ctx context.Context, req *pb.Create
 		return nil, err
 	}
 
-	// Save to database
 	result := s.db.Create(dbAttachment)
 	if result.Error != nil {
 		return nil, result.Error
 	}
 
-	// Convert back to protobuf Transaction
 	createdAttachment := &pb.Attachment{
 		Id:         dbAttachment.Id.String(),
 		Type:       pb.AttachmentType(dbAttachment.Type),
