@@ -30,6 +30,38 @@ message CreateCategoryResponse {
   Category data = 2;
 }
 
+message ListCategoryRequest {
+  int32 take = 1;
+  int32 skip = 2;
+  string user_id = 3;
+  int64 total = 4;
+}
+
+message ListCategoryResponse {
+  repeated Category data = 1;
+  int32 take = 2;
+  int32 skip = 3;
+  int64 total = 4;
+}
+
+message GetCategoryRequest {
+  string id = 1;
+  string user_id = 2;
+}
+
+message DeleteCategoryRequest {
+  string id = 1;
+  string user_id = 2;
+}
+
+message DeleteCategoryResponse {
+  string message = 1;
+}
+
 service CategoryService {
   rpc CreateCategory (CreateCategoryRequest) returns (CreateCategoryResponse);
+  rpc ListCategories (ListCategoryRequest) returns (ListCategoryResponse);
+  rpc EditCategory (Category) returns (Category);
+  rpc GetCategory (GetCategoryRequest) returns (Category);
+  rpc DeleteCategory (DeleteCategoryRequest) returns (DeleteCategoryResponse);
 }
