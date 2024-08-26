@@ -2,8 +2,6 @@ package models
 
 import (
 	base_models "pft/main/internal/app/models/base"
-
-	"github.com/google/uuid"
 )
 
 type AttachmentType int
@@ -15,7 +13,7 @@ const (
 type Attachment struct {
 	Type          AttachmentType `gorm:"type:int;not null;"`
 	ContentUrl    string         `gorm:"type:varchar(255);not null;" validate:"required,url"`
-	TransactionId uuid.UUID      `gorm:"type:uuid"`
+	TransactionId *string        `gorm:"type:uuid"`
 	Transaction   *Transaction   `gorm:"foreignKey:TransactionId;references:Id;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 
 	// Embedded

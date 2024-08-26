@@ -76,7 +76,24 @@ message GetTransactionRequest {
   int32 timezone = 3;
 }
 
+message EditTransactionRequest {
+  Transaction data = 1;
+  int32 timezone = 2;
+}
+
+message DeleteTransactionRequest {
+  string id = 1;
+  string user_id = 2;
+}
+
+message DeleteTransactionResponse {
+  string message = 1;
+}
+
 service TransactionService {
   rpc CreateTransaction (CreateTransactionRequest) returns (CreateTransactionResponse);
   rpc ListTransactions (ListTransactionRequest) returns (ListTransactionResponse);
+  rpc GetTransaction (GetTransactionRequest) returns (Transaction);
+  rpc EditTransaction (EditTransactionRequest) returns (Transaction);
+  rpc DeleteTransaction (DeleteTransactionRequest) returns (DeleteTransactionResponse);
 }

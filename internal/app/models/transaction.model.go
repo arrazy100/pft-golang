@@ -21,7 +21,7 @@ type Transaction struct {
 	TransactionDate time.Time       `gorm:"index" validate:"required"`
 	CategoryId      uuid.UUID       `gorm:"type:uuid;not null" validate:"required"`
 	AccountId       uuid.UUID       `gorm:"type:uuid;not null" validate:"required"`
-	AttachmentId    uuid.UUID       `gorm:"type:uuid"`
+	AttachmentId    *string         `gorm:"type:uuid"`
 
 	// Embedded
 	base_models.BaseAudit
@@ -32,11 +32,18 @@ type Transaction struct {
 	Attachment *Attachment `gorm:"foreignKey:AttachmentId"`
 }
 
-func (t *Transaction) SetAttachment(attachmentId string) {
+func (t *Transaction) SetAttachment(attachmentId string) error {
 	if attachmentId == "" {
-		t.AttachmentId = uuid.Nil
-		return
+		t.AttachmentId = nil
+		return nil
 	}
 
-	t.AttachmentId = uuid.MustParse(attachmentId)
+	_, err := uuid.Parse(attachmentId)
+	if err != nil {
+		return err
+	}
+
+	t.AttachmentId = &attachmentId
+
+	return nil
 }

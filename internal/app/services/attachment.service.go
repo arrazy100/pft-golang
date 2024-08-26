@@ -27,7 +27,7 @@ func (s *AttachmentService) CreateAttachment(ctx context.Context, req *pb.Create
 		return nil, fmt.Errorf("no attachment data provided")
 	}
 
-	userId := "597c5e7d-63dc-4df1-9954-fefe8b415634"
+	userId := attachment.UserId
 
 	dbAttachment := &models.Attachment{
 		Type:       models.AttachmentType(attachment.Type),

@@ -25,7 +25,8 @@ message AttachmentMini {
 
 message AttachmentCreate {
     AttachmentType type = 1;
-    string content_url = 2;  
+    string content_url = 2;
+    string user_id = 3; 
 }
 
 message CreateAttachmentRequest {
